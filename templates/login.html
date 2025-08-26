@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Вход</h1>
+<form method="POST">
+    <div>
+        <label>Имя пользователя:</label>
+        <input type="text" name="username" required style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+    </div>
+    <div>
+        <label>Пароль:</label>
+        <input type="password" name="password" required style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+    </div>
+    <button type="submit">Войти</button>
+</form>
+<p>Нет аккаунта? <a href="{{ url_for('register') }}">Зарегистрируйтесь</a></p>
+{% endblock %}
