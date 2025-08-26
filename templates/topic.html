@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="topic-detail">
+    <h1>{{ topic.title }}</h1>
+    <div class="topic-content">
+        <p>{{ topic.content }}</p>
+        <small>Автор: {{ topic.author }} | {{ topic.created_at }}</small>
+    </div>
+
+    <div class="posts">
+        <h2>Ответы ({{ posts|length }})</h2>
+        {% for post in posts %}
+        <div class="post">
+            <p>{{ post.content }}</p>
+            <small>Автор: {{ post.author }} | {{ post.created_at }}</small>
+        </div>
+        {% else %}
+        <p>Пока нет ответов.</p>
+        {% endfor %}
+    </div>
+
+    {% if 'username' in session %}
+    <div class="add-post">
+        <h3>Добавить ответ</h3>
+        <form method="POST" action="{{ url_for('add_post', topic_id=topic.id) }}">
+            <textarea name="content" required placeholder="Ваше сообщение..."></textarea>
+            <button type="submit">Отправить</button>
+        </form>
+    </div>
+    {% else %}
+    <p><a href="{{ url_for('login') }}">Войдите</a>, чтобы оставить ответ.</p>
+    {% endif %}
+</div>
+{% endblock %}
