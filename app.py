@@ -3,14 +3,14 @@ from datetime import datetime
 import uuid
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-here'  # Важно для сессий и flash сообщений
+app.secret_key = 'y1234' 
 
-# Вместо базы данных используем списки
+
 users = []
 topics = []
 posts = []
 
-# Простейшая "база данных" в памяти
+
 def find_user(username):
     return next((u for u in users if u['username'] == username), None)
 
@@ -82,7 +82,7 @@ def add_post(topic_id):
 def register():
     if request.method == 'POST':
         username = request.form['username']
-        password = request.form['password']  # В реальном приложении нужно хэшировать!
+        password = request.form['password']  # нужно хэшировать!
         
         if find_user(username):
             flash('Имя пользователя уже занято')
@@ -90,7 +90,7 @@ def register():
         
         users.append({
             'username': username,
-            'password': password,  # Не безопасно! Только для демонстрации
+            'password': password,  # not безопасно sql ataki
             'created_at': datetime.now()
         })
         
@@ -107,7 +107,7 @@ def login():
         
         user = find_user(username)
         
-        if user and user['password'] == password:  # Не безопасно! Только для демонстрации
+        if user and user['password'] == password:  # sql atacki
             session['username'] = username
             return redirect(url_for('index'))
         else:
@@ -121,4 +121,6 @@ def logout():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
+
