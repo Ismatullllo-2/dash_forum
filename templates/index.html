@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Форум</h1>
+<div class="topics">
+    {% for topic in topics %}
+    <div class="topic">
+        <h2><a href="{{ url_for('topic', topic_id=topic.id) }}">{{ topic.title }}</a></h2>
+        <p>{{ topic.content[:200] }}{% if topic.content|length > 200 %}...{% endif %}</p>
+        <small>Автор: {{ topic.author }} | {{ topic.created_at }}</small>
+    </div>
+    {% else %}
+    <p>Пока нет тем для обсуждения.</p>
+    {% endfor %}
+</div>
+{% endblock %}
