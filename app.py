@@ -57,7 +57,7 @@ def create_topic():
         flash('Тема создана успешно!')
         return redirect(url_for('index'))
     
-    return render_template('create_topic.html')
+    return render_template('n_topic.html')
 
 @app.route('/add_post/<topic_id>', methods=['POST'])
 def add_post(topic_id):
@@ -124,5 +124,6 @@ def logout():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
+
 
 
