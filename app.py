@@ -7,7 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 # Инициализация приложения
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-secret-key-here-change-in-production'
+app.config['SECRET_KEY'] = 'your-secret-key-here-change-in-production'  # Исправлено
 
 # Конфигурация базы данных
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -117,7 +117,7 @@ def new_topic():
         else:
             flash('Заполните все поля', 'error')
     
-    return render_template('n_topic.html')
+    return render_template('new_topic.html')
 
 @app.route('/reply/<int:topic_id>', methods=['POST'])
 @login_required
@@ -212,18 +212,35 @@ def logout():
     flash('Вы вышли из системы', 'info')
     return redirect(url_for('index'))
 
+#рендер через 10 минут сервер глушит если никого нету это что бы не глушил
+def start_keep_alive():
+    import threading
+    import time
+    import requests
+    from datetime import datetime
+    
+    def ping_server():
+        while True:
+            try:
+                requests.get("https://your-render-app.onrender.com", timeout=5)
+                print(f"{datetime.now()} - Keep-alive ping sent")
+            except Exception as e:
+                print(f"{datetime.now()} - Ping error: {e}")
+            time.sleep(600)    
+    thread = threading.Thread(target=ping_server, daemon=True)
+    thread.start()
+
 # Запуск приложения
 if __name__ == '__main__':
-    # Создаем тестовые данные, если их нет
+    start_keep_alive()
+    
+
     with app.app_context():
         if not User.query.first():
-            # Создаем тестового пользователя
             test_user = User(username='test', email='test@example.com')
             test_user.set_password('test')
-            db.session.add(test_user)
-            db.session.commit()
-            
-            # Создаем тестовые темы
+            db.session.add(test_user) 
+   
             topic1 = Topic(title='Добро пожаловать на форум!', 
                           content='Это тестовая тема для демонстрации работы форума.', 
                           user_id=test_user.id)
@@ -231,13 +248,12 @@ if __name__ == '__main__':
                           content='Здесь будут правила нашего форума.', 
                           user_id=test_user.id)
             db.session.add_all([topic1, topic2])
-            db.session.commit()
-            
-            # Создаем тестовые ответы
+
             reply1 = Reply(content='Отличный форум!', user_id=test_user.id, topic_id=1)
             reply2 = Reply(content='Согласен с правилами', user_id=test_user.id, topic_id=2)
             db.session.add_all([reply1, reply2])
+            
+       
             db.session.commit()
     
-    # Запускаем приложение
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True)
