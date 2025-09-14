@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Форум - Dash Forum{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>Форум</h1>
+    <p>Обсуждайте интересные темы с сообществом</p>
+</div>
+
+<div class="forum-actions">
+    <a href="{{ url_for('new_topic') }}" class="btn">Создать новую тему</a>
+</div>
+
+<div class="forum-table">
+    <div class="forum-header">
+        <div class="forum-col-main">Тема</div>
+        <div class="forum-col-stat">Ответы</div>
+        <div class="forum-col-stat">Просмотры</div>
+        <div class="forum-col-last">Последнее сообщение</div>
+    </div>
+
+    {% for topic in topics %}
+    <div class="forum-row">
+        <div class="forum-col-main">
+            <div class="topic-title">
+                <a href="{{ url_for('topic', topic_id=topic.id) }}">{{ topic.title }}</a>
+            </div>
+            <div class="topic-meta">
+                Автор: <span class="author">{{ topic.author.username }}</span> • 
+                Дата: <span class="date">{{ topic.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+            </div>
+        </div>
+        <div class="forum-col-stat">{{ topic.reply_count }}</div>
+        <div class="forum-col-stat">{{ topic.views }}</div>
+        <div class="forum-col-last">
+            {% if topic.last_reply %}
+                <div class="last-author">{{ topic.last_reply.author.username }}</div>
+                <div class="last-date">{{ topic.last_reply.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+            {% else %}
+                <div class="last-author">{{ topic.author.username }}</div>
+                <div class="last-date">{{ topic.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="pagination">
+    {% if prev_url %}
+        <a href="{{ prev_url }}" class="btn btn-outline">Назад</a>
+    {% endif %}
+    {% if next_url %}
+        <a href="{{ next_url }}" class="btn btn-outline">Вперед</a>
+    {% endif %}
+</div>
+{% endblock %}

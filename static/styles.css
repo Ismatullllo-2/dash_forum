@@ -1,0 +1,702 @@
+/* Основные стили */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #1a1a1a;
+    color: #fff;
+    line-height: 1.6;
+}
+
+nav {
+    background: #ff884c;
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: 0 2px 15px rgba(255, 136, 76, 0.4);
+    border-bottom: 3px solid #ffaa66;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    margin-right: 1rem;
+}
+
+.logo img {
+    height: 40px;
+    width: auto;
+    border-radius: 5px;
+    object-fit: contain;
+}
+
+.nav-link {
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.5rem 0.8rem;
+    border-radius: 4px;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.nav-link:hover {
+    background-color: rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: white;
+    transition: width 0.3s;
+}
+
+.nav-link:hover::after {
+    width: 100%;
+}
+
+.nav-user {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.nav-user span {
+    color: white;
+    font-weight: 500;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 2rem;
+    background: linear-gradient(to right, rgba(255, 136, 76, 0.2), rgba(255, 136, 76, 0.1));
+    border-radius: 12px;
+    border-left: 5px solid #ff884c;
+}
+
+.header h1 {
+    color: #ff884c;
+    font-size: 2.8rem;
+    margin-bottom: 0.5rem;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.header p {
+    color: #ddd;
+    font-size: 1.2rem;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.highlight {
+    color: #ff884c;
+    font-weight: 600;
+}
+
+.topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.8rem;
+    margin-top: 2rem;
+}
+
+.topic-card {
+    background: #2a2a2a;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid #3a3a3a;
+}
+
+.topic-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 25px rgba(255, 136, 76, 0.25);
+    border-color: #ff884c;
+}
+
+.topic-header {
+    background: #ff884c;
+    color: white;
+    padding: 1.2rem;
+    position: relative;
+}
+
+.topic-header h3 {
+    margin: 0;
+    font-size: 1.4rem;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.topic-content {
+    padding: 1.5rem;
+}
+
+.topic-meta {
+    display: flex;
+    justify-content: space-between;
+    color: #bbb;
+    font-size: 0.9rem;
+    margin-top: 1.2rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid #444;
+}
+
+.btn {
+    display: inline-block;
+    background: #ff884c;
+    color: white;
+    padding: 0.8rem 1.8rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    box-shadow: 0 4px 8px rgba(255, 136, 76, 0.3);
+}
+
+.btn:hover {
+    background: #ff7733;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(255, 136, 76, 0.4);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid #ff884c;
+    color: #ff884c;
+    box-shadow: none;
+}
+
+.btn-outline:hover {
+    background: #ff884c;
+    color: white;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #ffaa66;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.9rem;
+    border: 1px solid #444;
+    border-radius: 6px;
+    font-size: 1rem;
+    background: #2a2a2a;
+    color: white;
+    transition: border 0.3s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #ff884c;
+    box-shadow: 0 0 0 2px rgba(255, 136, 76, 0.2);
+}
+
+textarea.form-control {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.flash {
+    padding: 1.2rem;
+    margin: 1.5rem 0;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.flash-success {
+    background: rgba(212, 237, 218, 0.2);
+    color: #a6f5b9;
+    border: 1px solid rgba(195, 230, 203, 0.3);
+}
+
+.flash-error {
+    background: rgba(248, 215, 218, 0.2);
+    color: #f8a7a7;
+    border: 1px solid rgba(245, 198, 203, 0.3);
+}
+
+.flash-info {
+    background: rgba(209, 231, 241, 0.2);
+    color: #9ed1e9;
+    border: 1px solid rgba(190, 219, 235, 0.3);
+}
+
+.section-title {
+    color: #ff884c;
+    margin: 2.5rem 0 1.5rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 2px solid #ff884c;
+    font-size: 1.8rem;
+}
+
+.accent-border {
+    border-left: 4px solid #ff884c;
+    padding-left: 1rem;
+}
+
+footer {
+    background: #111;
+    color: #aaa;
+    text-align: center;
+    padding: 2.5rem;
+    margin-top: 4rem;
+    border-top: 3px solid #ff884c;
+}
+
+.footer-highlight {
+    color: #ffaa66;
+    font-weight: 600;
+}
+
+/* Стили для форума */
+.forum-table {
+    background: #2a2a2a;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.forum-header {
+    display: flex;
+    background: #ff884c;
+    color: white;
+    padding: 1rem;
+    font-weight: 600;
+    border-bottom: 2px solid #ffaa66;
+}
+
+.forum-row {
+    display: flex;
+    padding: 1rem;
+    border-bottom: 1px solid #444;
+    transition: background 0.3s;
+}
+
+.forum-row:hover {
+    background: rgba(255, 136, 76, 0.1);
+}
+
+.forum-row:last-child {
+    border-bottom: none;
+}
+
+.forum-col-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.forum-col-stat {
+    width: 100px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.forum-col-last {
+    width: 150px;
+    text-align: right;
+}
+
+.topic-title a {
+    color: #ff884c;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 1.1rem;
+}
+
+.topic-title a:hover {
+    text-decoration: underline;
+}
+
+.topic-meta {
+    color: #aaa;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.author {
+    color: #ffaa66;
+    font-weight: 500;
+}
+
+.last-author {
+    color: #ffaa66;
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+}
+
+.last-date {
+    color: #aaa;
+    font-size: 0.9rem;
+}
+
+.forum-actions {
+    margin: 1.5rem 0;
+    text-align: right;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+/* Стили для темы */
+.topic-detail {
+    background: #2a2a2a;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.topic-detail-header {
+    border-bottom: 2px solid #ff884c;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.topic-detail-header h1 {
+    color: #ff884c;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.topic-detail-meta {
+    display: flex;
+    justify-content: space-between;
+    color: #aaa;
+    font-size: 0.9rem;
+}
+
+.topic-detail-content {
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+}
+
+.reply-form {
+    background: #2a2a2a;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.reply-list {
+    background: #2a2a2a;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.reply-item {
+    padding: 1.5rem;
+    border-bottom: 1px solid #444;
+}
+
+.reply-item:last-child {
+    border-bottom: none;
+}
+
+.reply-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #444;
+}
+
+.reply-author {
+    color: #ffaa66;
+    font-weight: 600;
+}
+
+.reply-date {
+    color: #aaa;
+    font-size: 0.9rem;
+}
+
+.reply-content {
+    line-height: 1.7;
+}
+
+@media (max-width: 768px) {
+    nav {
+        flex-direction: column;
+        padding: 1.2rem;
+    }
+    
+    .nav-user {
+        margin-left: 0;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .topics-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .header h1 {
+        font-size: 2.2rem;
+    }
+    
+    .forum-header {
+        display: none;
+    }
+    
+    .forum-row {
+        flex-direction: column;
+        padding: 1.2rem;
+    }
+    
+    .forum-col-stat, .forum-col-last {
+        width: 100%;
+        text-align: left;
+        margin-top: 0.8rem;
+        padding-top: 0.8rem;
+        border-top: 1px solid #444;
+    }
+    
+    .forum-col-stat {
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .forum-col-stat::before {
+        content: "Ответы:";
+        font-weight: 600;
+        color: #ff884c;
+    }
+    
+    .forum-col-stat:nth-child(3)::before {
+        content: "Просмотры:";
+    }
+}
+/* Стили для страницы темы */
+.topic-detail {
+    background: #2a2a2a;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.topic-detail-header {
+    border-bottom: 2px solid #ff884c;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.topic-detail-header h1 {
+    color: #ff884c;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.topic-detail-meta {
+    display: flex;
+    justify-content: space-between;
+    color: #aaa;
+    font-size: 0.9rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.author-info, .topic-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.author {
+    color: #ffaa66;
+    font-weight: 500;
+}
+
+.topic-detail-content {
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+}
+
+.topic-actions {
+    margin-top: 1.5rem;
+    text-align: right;
+}
+
+/* Стили для списка ответов */
+.reply-list {
+    background: #2a2a2a;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    margin-bottom: 2rem;
+}
+
+.reply-list .section-title {
+    background: #ff884c;
+    color: white;
+    padding: 1rem 1.5rem;
+    margin: 0;
+    border-radius: 8px 8px 0 0;
+}
+
+.reply-item {
+    padding: 1.5rem;
+    border-bottom: 1px solid #444;
+    transition: background 0.3s;
+}
+
+.reply-item:hover {
+    background: rgba(255, 136, 76, 0.05);
+}
+
+.reply-item:last-child {
+    border-bottom: none;
+}
+
+.reply-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #444;
+}
+
+.reply-author {
+    color: #ffaa66;
+    font-weight: 600;
+}
+
+.reply-date {
+    color: #aaa;
+    font-size: 0.9rem;
+}
+
+.reply-content {
+    line-height: 1.7;
+}
+
+.no-replies {
+    padding: 2rem;
+    text-align: center;
+    color: #aaa;
+}
+
+/* Стили для формы ответа */
+.reply-form {
+    background: #2a2a2a;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .topic-detail-meta {
+        flex-direction: column;
+    }
+    
+    .reply-header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .topic-detail-header h1 {
+        font-size: 1.5rem;
+    }
+}
+/* Стили для форм аутентификации */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 60vh;
+    padding: 2rem 0;
+}
+
+.auth-form {
+    background: #2a2a2a;
+    border-radius: 8px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.auth-form .section-title {
+    text-align: center;
+    margin-top: 0;
+}
+
+.btn-block {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.form-text {
+    color: #aaa;
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+}
+
+.form-check {
+    margin: 1rem 0;
+}
+
+.form-check-input {
+    margin-right: 0.5rem;
+}
+
+.form-check-label {
+    color: #ddd;
+}
+
+.auth-links {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.auth-links a {
+    color: #ff884c;
+    text-decoration: none;
+}
+
+.auth-links a:hover {
+    text-decoration: underline;
+}
