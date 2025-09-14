@@ -7,9 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-secret-key-here-change-in-production'  
-
-
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'fallback-development-key-change-in-production')
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'forum.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -249,4 +247,5 @@ if __name__ == '__main__':
             db.session.commit()
     
     app.run(debug=True)
+
 
