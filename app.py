@@ -212,16 +212,21 @@ def start_keep_alive():
     def ping_server():
         while True:
             try:
-                requests.get("https://your-render-app.onrender.com", timeout=5)
-                print(f"{datetime.now()} - Keep-alive ping sent")
+                base_url = os.environ.get('RENDER_EXTERNAL_URL', 'http://localhost:5000')
+                requests.get(f"{base_url}/", timeout=5)
+                print(f"{datetime.now()} - Keep-alive ping sent to {base_url}")
             except Exception as e:
                 print(f"{datetime.now()} - Ping error: {e}")
-            time.sleep(600)    
+            time.sleep(300)  
+    
     thread = threading.Thread(target=ping_server, daemon=True)
     thread.start()
 
-# Запуск приложения
+# Запускаем keep-alive при старте
+start_keep_alive()
+
 if __name__ == '__main__':
+
     with app.app_context():
         db.drop_all()
         db.create_all()
@@ -245,7 +250,6 @@ if __name__ == '__main__':
         db.session.commit()
         print("Test data created successfully!")
     
-    app.run(debug=True)
-
-
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
 
