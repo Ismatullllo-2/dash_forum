@@ -5,11 +5,11 @@ from datetime import datetime
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# Инициализация приложения
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-secret-key-here-change-in-production'  # Исправлено
 
-# Конфигурация базы данных
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'your-secret-key-here-change-in-production'  
+
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'forum.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -20,7 +20,7 @@ login_manager.login_view = 'login'
 login_manager.login_message = 'Пожалуйста, войдите для доступа к этой странице.'
 login_manager.login_message_category = 'info'
 
-# Модели данных
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -60,19 +60,17 @@ class Reply(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
 
-# Загрузчик пользователя для Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# Создание таблиц в базе данных
+
 with app.app_context():
     db.create_all()
 
-# Маршруты
+
 @app.route('/')
 def index():
-    # Получаем последние темы для главной страницы
     latest_topics = Topic.query.order_by(Topic.created_at.desc()).limit(5).all()
     return render_template('index.html', topics=latest_topics)
 
@@ -81,7 +79,6 @@ def topics():
     page = request.args.get('page', 1, type=int)
     per_page = 20
     
-    # Получаем все темы с пагинацией
     all_topics = Topic.query.order_by(Topic.created_at.desc()).paginate(
         page=page, per_page=per_page, error_out=False)
     
@@ -96,7 +93,6 @@ def topics():
 @app.route('/topic/<int:topic_id>')
 def topic(topic_id):
     topic = Topic.query.get_or_404(topic_id)
-    # Увеличиваем счетчик просмотров
     topic.views += 1
     db.session.commit()
     return render_template('topic.html', topic=topic)
@@ -135,10 +131,9 @@ def reply(topic_id):
     
     return redirect(url_for('topic', topic_id=topic_id))
 
-# Маршруты аутентификации
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # Если пользователь уже авторизован, перенаправляем на главную
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     
@@ -161,7 +156,6 @@ def login():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    # Если пользователь уже авторизован, перенаправляем на главную
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     
@@ -171,7 +165,6 @@ def register():
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
         
-        # Валидация данных
         errors = []
         
         if not username or not email or not password:
@@ -193,7 +186,6 @@ def register():
             for error in errors:
                 flash(error, 'error')
         else:
-            # Создаем нового пользователя
             new_user = User(username=username, email=email)
             new_user.set_password(password)
             
@@ -257,3 +249,4 @@ if __name__ == '__main__':
             db.session.commit()
     
     app.run(debug=True)
+
