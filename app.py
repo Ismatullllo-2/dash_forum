@@ -222,30 +222,30 @@ def start_keep_alive():
 
 # Запуск приложения
 if __name__ == '__main__':
-    start_keep_alive()
-    
-
     with app.app_context():
-        if not User.query.first():
-            test_user = User(username='test', email='test@example.com')
-            test_user.set_password('test')
-            db.session.add(test_user) 
-   
-            topic1 = Topic(title='Добро пожаловать на форум!', 
-                          content='Это тестовая тема для демонстрации работы форума.', 
-                          user_id=test_user.id)
-            topic2 = Topic(title='Правила форума', 
-                          content='Здесь будут правила нашего форума.', 
-                          user_id=test_user.id)
-            db.session.add_all([topic1, topic2])
-
-            reply1 = Reply(content='Отличный форум!', user_id=test_user.id, topic_id=1)
-            reply2 = Reply(content='Согласен с правилами', user_id=test_user.id, topic_id=2)
-            db.session.add_all([reply1, reply2])
-            
-       
-            db.session.commit()
+        db.drop_all()
+        db.create_all()
+        
+        test_user = User(username='test', email='test@example.com')
+        test_user.set_password('test')
+        db.session.add(test_user)
+        
+        topic1 = Topic(title='Добро пожаловать на форум!', 
+                      content='Это тестовая тема для демонстрации работы форума.', 
+                      user_id=1)
+        topic2 = Topic(title='Правила форума', 
+                      content='Здесь будут правила нашего форума.', 
+                      user_id=1)
+        db.session.add_all([topic1, topic2])
+        
+        reply1 = Reply(content='Отличный форум!', user_id=1, topic_id=1)
+        reply2 = Reply(content='Согласен с правилами', user_id=1, topic_id=2)
+        db.session.add_all([reply1, reply2])
+        
+        db.session.commit()
+        print("Test data created successfully!")
     
     app.run(debug=True)
+
 
 
