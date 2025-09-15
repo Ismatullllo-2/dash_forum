@@ -149,6 +149,25 @@ def new_topic():
     
     return render_template('new_topic.html')
 
+
+@app.route('/topic/<int:topic_id>')
+def topic(topic_id):
+    topic = Topic.query.get_or_404(topic_id)
+
+    if topic.is_deleted:
+        flash('Тема была удалена', 'error')
+        return redirect(url_for('topics'))
+    
+    if not topic.author.is_active:
+        flash('Автор темы удалил свой аккаунт', 'error')
+        return redirect(url_for('topics'))
+
+    topic.views += 1
+    db.session.commit()
+    
+    return render_template('topic.html', topic=topic)
+
+
 @app.route('/profile/delete', methods=['GET', 'POST'])
 @login_required
 def delete_own_account():
@@ -156,7 +175,6 @@ def delete_own_account():
         password = request.form.get('password')
         
         if current_user.check_password(password):
-            # Мягкое удаление аккаунта
             current_user.is_active = False
             db.session.commit()
             
