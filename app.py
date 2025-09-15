@@ -1,16 +1,23 @@
-from flask import Flask, render_template, url_for, redirect, request, flash
+from flask import Flask, render_template, url_for, redirect, request, flash, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required, UserMixin
 from datetime import datetime
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
-
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'fallback-development-key-change-in-production')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'forum.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(basedir, 'forum.db'))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+app.config['UPLOAD_FOLDER'] = os.path.join(basedir, 'uploads')
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  #max 16 mb
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'zip', 'doc', 'docx'}
+
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
@@ -18,13 +25,14 @@ login_manager.login_view = 'login'
 login_manager.login_message = 'Пожалуйста, войдите для доступа к этой странице.'
 login_manager.login_message_category = 'info'
 
-
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(120), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_admin = db.Column(db.Boolean, default=False)
+    is_active = db.Column(db.Boolean, default=True)  # Мягкое удаление
     topics = db.relationship('Topic', backref='author', lazy=True)
     replies = db.relationship('Reply', backref='author', lazy=True)
     
@@ -41,7 +49,9 @@ class Topic(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     views = db.Column(db.Integer, default=0)
+    is_deleted = db.Column(db.Boolean, default=False)  # Мягкое удаление
     replies = db.relationship('Reply', backref='topic', lazy=True, cascade='all, delete-orphan')
+    attachments = db.relationship('Attachment', backref='topic', lazy=True, cascade='all, delete-orphan')
     
     @property
     def reply_count(self):
@@ -57,6 +67,24 @@ class Reply(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
+    attachments = db.relationship('Attachment', backref='reply', lazy=True, cascade='all, delete-orphan')
+
+class Attachment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(255), nullable=False)
+    original_filename = db.Column(db.String(255), nullable=False)
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+    topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=True)
+    reply_id = db.Column(db.Integer, db.ForeignKey('reply.id'), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def is_admin():
+    return current_user.is_authenticated and current_user.is_admin
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -76,26 +104,15 @@ def index():
 def topics():
     page = request.args.get('page', 1, type=int)
     per_page = 20
-    
-    all_topics = Topic.query.order_by(Topic.created_at.desc()).paginate(
+
+    all_topics = Topic.query.filter_by(is_deleted=False)\
+        .join(User).filter(User.is_active == True)\
+        .order_by(Topic.created_at.desc()).paginate(
         page=page, per_page=per_page, error_out=False)
     
-    next_url = url_for('topics', page=all_topics.next_num) if all_topics.has_next else None
-    prev_url = url_for('topics', page=all_topics.prev_num) if all_topics.has_prev else None
-    
-    return render_template('topics.html', 
-                          topics=all_topics.items, 
-                          next_url=next_url, 
-                          prev_url=prev_url)
+    return render_template('topics.html', topics=all_topics.items)
 
-@app.route('/topic/<int:topic_id>')
-def topic(topic_id):
-    topic = Topic.query.get_or_404(topic_id)
-    topic.views += 1
-    db.session.commit()
-    return render_template('topic.html', topic=topic)
-
-@app.route('/n_topic', methods=['GET', 'POST'])
+@app.route('/new_topic', methods=['GET', 'POST'])
 @login_required
 def new_topic():
     if request.method == 'POST':
@@ -105,6 +122,25 @@ def new_topic():
         if title and content:
             new_topic = Topic(title=title, content=content, user_id=current_user.id)
             db.session.add(new_topic)
+            db.session.flush() 
+            
+            if 'files' in request.files:
+                files = request.files.getlist('files')
+                for file in files:
+                    if file and file.filename and allowed_file(file.filename):
+                        filename = secure_filename(file.filename)
+                        unique_filename = f"{datetime.now().timestamp()}_{filename}"
+                        file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+                        file.save(file_path)
+                        
+                        attachment = Attachment(
+                            filename=unique_filename,
+                            original_filename=filename,
+                            topic_id=new_topic.id,
+                            user_id=current_user.id
+                        )
+                        db.session.add(attachment)
+            
             db.session.commit()
             flash('Тема успешно создана!', 'success')
             return redirect(url_for('topic', topic_id=new_topic.id))
@@ -112,6 +148,69 @@ def new_topic():
             flash('Заполните все поля', 'error')
     
     return render_template('new_topic.html')
+
+@app.route('/profile/delete', methods=['GET', 'POST'])
+@login_required
+def delete_own_account():
+    if request.method == 'POST':
+        password = request.form.get('password')
+        
+        if current_user.check_password(password):
+            # Мягкое удаление аккаунта
+            current_user.is_active = False
+            db.session.commit()
+            
+            logout_user()
+            flash('Ваш аккаунт успешно удален', 'success')
+            return redirect(url_for('index'))
+        else:
+            flash('Неверный пароль', 'error')
+    
+    return render_template('delete_account.html')
+
+@app.route('/admin/delete_user/<int:user_id>', methods=['POST'])
+@login_required
+def admin_delete_user(user_id):
+    if not is_admin():
+        flash('Недостаточно прав', 'error')
+        return redirect(url_for('index'))
+    
+    user = User.query.get_or_404(user_id)
+
+    if user.id == current_user.id:
+        flash('Нельзя удалить свой собственный аккаунт', 'error')
+    elif user.is_admin:
+        flash('Нельзя удалить другого администратора', 'error')
+    else:
+        user.is_active = False
+        db.session.commit()
+        flash(f'Аккаунт пользователя {user.username} удален', 'success')
+    
+    return redirect(url_for('admin_users'))
+
+@app.route('/admin/restore_user/<int:user_id>', methods=['POST'])
+@login_required
+def admin_restore_user(user_id):
+    if not is_admin():
+        flash('Недостаточно прав', 'error')
+        return redirect(url_for('index'))
+    
+    user = User.query.get_or_404(user_id)
+    user.is_active = True
+    db.session.commit()
+    flash(f'Аккаунт пользователя {user.username} восстановлен', 'success')
+    
+    return redirect(url_for('admin_users'))
+
+@app.route('/admin/users')
+@login_required
+def admin_users():
+    if not is_admin():
+        flash('Недостаточно прав', 'error')
+        return redirect(url_for('index'))
+    
+    users = User.query.order_by(User.created_at.desc()).all()
+    return render_template('admin_users.html', users=users)
 
 @app.route('/reply/<int:topic_id>', methods=['POST'])
 @login_required
@@ -122,6 +221,25 @@ def reply(topic_id):
     if content:
         new_reply = Reply(content=content, user_id=current_user.id, topic_id=topic_id)
         db.session.add(new_reply)
+        db.session.flush()
+        
+        if 'files' in request.files:
+            files = request.files.getlist('files')
+            for file in files:
+                if file and file.filename and allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    unique_filename = f"{datetime.now().timestamp()}_{filename}"
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+                    file.save(file_path)
+                    
+                    attachment = Attachment(
+                        filename=unique_filename,
+                        original_filename=filename,
+                        reply_id=new_reply.id,
+                        user_id=current_user.id
+                    )
+                    db.session.add(attachment)
+        
         db.session.commit()
         flash('Ответ добавлен!', 'success')
     else:
@@ -202,6 +320,48 @@ def logout():
     flash('Вы вышли из системы', 'info')
     return redirect(url_for('index'))
 
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+@app.route('/admin/delete_topic/<int:topic_id>', methods=['POST'])
+@login_required
+def admin_delete_topic(topic_id):
+    if not is_admin():
+        flash('Недостаточно прав для выполнения этой операции', 'error')
+        return redirect(url_for('index'))
+    
+    topic = Topic.query.get_or_404(topic_id)
+    topic.is_deleted = True
+    db.session.commit()
+    
+    flash('Тема успешно удалена', 'success')
+    return redirect(url_for('topics'))
+
+@app.route('/admin/restore_topic/<int:topic_id>', methods=['POST'])
+@login_required
+def admin_restore_topic(topic_id):
+    if not is_admin():
+        flash('Недостаточно прав для выполнения этой операции', 'error')
+        return redirect(url_for('index'))
+    
+    topic = Topic.query.get_or_404(topic_id)
+    topic.is_deleted = False
+    db.session.commit()
+    
+    flash('Тема восстановлена', 'success')
+    return redirect(url_for('topics'))
+
+@app.route('/admin/topics')
+@login_required
+def admin_topics():
+    if not is_admin():
+        flash('Недостаточно прав для доступа к этой странице', 'error')
+        return redirect(url_for('index'))
+    
+    deleted_topics = Topic.query.filter_by(is_deleted=True).all()
+    return render_template('admin_topics.html', topics=deleted_topics)
+
 #рендер через 10 минут сервер глушит если никого нету это что бы не глушил
 def start_keep_alive():
     import threading
@@ -222,7 +382,6 @@ def start_keep_alive():
     thread = threading.Thread(target=ping_server, daemon=True)
     thread.start()
 
-# Запускаем keep-alive при старте
 start_keep_alive()
 
 if __name__ == '__main__':
@@ -230,11 +389,11 @@ if __name__ == '__main__':
     with app.app_context():
         db.drop_all()
         db.create_all()
-        
-        test_user = User(username='test', email='test@example.com')
-        test_user.set_password('test')
-        db.session.add(test_user)
-        
+
+        test_admin = User(username=NAME_ADMIN, email=EMAIL_ADMIN, is_admin=True)
+        test_admin.set_password(PASSWORD_ADMIN)
+        db.session.add(test_admin)
+
         topic1 = Topic(title='Добро пожаловать на форум!', 
                       content='Это тестовая тема для демонстрации работы форума.', 
                       user_id=1)
