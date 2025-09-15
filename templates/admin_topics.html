@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Удаленные темы</h2>
+{% for topic in topics %}
+<div class="topic">
+    <h3>{{ topic.title }}</h3>
+    <p>{{ topic.content }}</p>
+    <form method="POST" action="{{ url_for('admin_restore_topic', topic_id=topic.id) }}">
+        <button type="submit">Восстановить</button>
+    </form>
+</div>
+{% endfor %}
+{% endblock %}

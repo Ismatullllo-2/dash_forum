@@ -14,6 +14,17 @@
         <a href="{{ url_for('index') }}" class="nav-link">Главная</a>
         <a href="{{ url_for('topics') }}" class="nav-link">Форум</a>
         <a href="{{ url_for('new_topic') }}" class="nav-link">Новая тема</a>
+        {% if current_user.is_authenticated %}
+        <li class="nav-item">
+            <a href="{{ url_for('delete_own_account') }}" class="nav-link text-danger">Удалить аккаунт</a>
+        </li>
+        {% endif %}
+
+    {% if current_user.is_authenticated and current_user.is_admin %}
+    <li class="nav-item">
+        <a href="{{ url_for('admin_users') }}" class="nav-link">Пользователи</a>
+    </li>
+    {% endif %}
         
         <div class="nav-user">
             {% if current_user.is_authenticated %}

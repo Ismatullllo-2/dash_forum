@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>Удаление аккаунта</h2>
+    <p class="warning">Внимание: это действие необратимо! Все ваши данные будут удалены.</p>
+    
+    <form method="POST">
+        <div class="form-group">
+            <label for="password">Подтвердите пароль:</label>
+            <input type="password" name="password" required class="form-control">
+        </div>
+        <button type="submit" class="btn btn-danger">Удалить аккаунт</button>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}
