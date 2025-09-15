@@ -391,7 +391,7 @@ if __name__ == '__main__':
         db.create_all()
 
         test_admin = User(username='Curaga', email='admin@dash.com', is_admin=True)
-        test_admin.set_password(PASSWORD_ADMIN)
+        test_admin.set_password('1234')
         db.session.add(test_admin)
 
         topic1 = Topic(title='Добро пожаловать на форум!', 
