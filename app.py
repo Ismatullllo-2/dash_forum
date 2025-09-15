@@ -390,7 +390,7 @@ if __name__ == '__main__':
         db.drop_all()
         db.create_all()
 
-        test_admin = User(username=NAME_ADMIN, email=EMAIL_ADMIN, is_admin=True)
+        test_admin = User(username=Curaga, email='admin@dash.com', is_admin=True)
         test_admin.set_password(PASSWORD_ADMIN)
         db.session.add(test_admin)
 
